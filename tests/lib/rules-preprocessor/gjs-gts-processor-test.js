@@ -9,6 +9,7 @@
 
 const { ESLint } = require('eslint');
 const plugin = require('../../../lib');
+const outdent = require('outdent');
 
 /**
  * Helper function which creates ESLint instance with enabled/disabled autofix feature.
@@ -42,106 +43,108 @@ function initESLint(options) {
   });
 }
 
-const valid = [
-  {
-    filename: 'my-component.js',
-    code: `
-      import Component from '@glimmer/component';
-
-      export default class MyComponent extends Component {
-        constructor() {
-          super(...arguments);
-        }
-      }
-    `,
-  },
-  {
-    filename: 'my-component.gjs',
-    code: `
-      import { on } from '@ember/modifier';
-
-      const noop = () => {};
-
-      <template>
-        <div {{on 'click' noop}} />
-      </template>
-    `,
-  },
-  {
-    filename: 'my-component.gjs',
-    code: `
-      import { on } from '@ember/modifier';
-
-      const noop = () => {};
-
-      export default <template>
-        <div {{on 'click' noop}} />
-      </template>
-    `,
-  },
-  {
-    filename: 'my-component.gjs',
-    code: `
-      const Foo = <template>hi</template>
-
-      <template>
-        <Foo />
-      </template>
-    `,
-  },
-];
-
-const invalid = [
-  {
-    filename: 'my-component.gjs',
-    code: `
-      const noop = () => {};
-
-      <template>
-        {{on 'click' noop}}
-      </template>
-    `,
-    errors: [
-      {
-        message: "'on' is not defined.",
-        line: 5,
-        column: 11,
-      },
-    ],
-  },
-  {
-    filename: 'my-component.gjs',
-    code: `
-      <template>
-        {{noop}}
-      </template>
-    `,
-    errors: [
-      {
-        message: "'noop' is not defined.",
-        line: 3,
-        column: 11,
-      },
-    ],
-  },
-  {
-    filename: 'my-component.gjs',
-    code: `
-      <template>
-        <Foo />
-      </template>
-    `,
-    errors: [
-      {
-        message: "'Foo' is not defined.",
-        line: 3,
-        column: 10,
-      },
-    ],
-  },
-];
-
 describe('template-vars', () => {
+  const valid = [
+    {
+      filename: 'my-component.js',
+      code: outdent`
+        import Component from '@glimmer/component';
+
+        export default class MyComponent extends Component {
+          constructor() {
+            super(...arguments);
+          }
+        }
+      `,
+    },
+    {
+      filename: 'my-component.gjs',
+      code: outdent`
+        import { on } from '@ember/modifier';
+
+        const noop = () => {};
+
+        <template>
+          <div {{on 'click' noop}} />
+        </template>
+      `,
+    },
+    {
+      filename: 'my-component.gjs',
+      code: outdent`
+        import { on } from '@ember/modifier';
+
+        const noop = () => {};
+
+        export default <template>
+          <div {{on 'click' noop}} />
+        </template>
+      `,
+    },
+    {
+      filename: 'my-component.gjs',
+      code: outdent`
+        const Foo = <template>
+          hi
+        </template>;
+
+        <template>
+          <Foo />
+        </template>
+      `,
+    },
+  ];
+
+  const invalid = [
+    {
+      filename: 'my-component.gjs',
+      code: outdent`
+        const noop = () => {};
+
+        <template>
+          {{on 'click' noop}}
+        </template>
+      `,
+      errors: [
+        {
+          message: "'on' is not defined.",
+          line: 4,
+          column: 5,
+        },
+      ],
+    },
+    {
+      filename: 'my-component.gjs',
+      code: outdent`
+        <template>
+          {{noop}}
+        </template>
+      `,
+      errors: [
+        {
+          message: "'noop' is not defined.",
+          line: 2,
+          column: 5,
+        },
+      ],
+    },
+    {
+      filename: 'my-component.gjs',
+      code: outdent`
+        <template>
+          <Foo />
+        </template>
+      `,
+      errors: [
+        {
+          message: "'Foo' is not defined.",
+          line: 2,
+          column: 4,
+        },
+      ],
+    },
+  ];
+
   describe('valid', () => {
     for (const scenario of valid) {
       const { code, filename } = scenario;
